@@ -1,0 +1,34 @@
+{
+  "name": "ep_signatureauth",
+  "version": "1.0.4",
+  "description": "Enable secure sign-in and signature verification from Canvas LMS with Etherpad collaborations tool.",
+  "author": "emdurr <ericdurr@atomicjolt.com> (Eric Durr)",
+  "contributors": [],
+  "dependencies": {
+    "async": "^1.2.1",
+    "async-stacktrace": "^0.0.2"
+  },
+  "engines": {
+    "node": ">= 0.6.0"
+  },
+  "main": "ep_signatureauth.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/atomicjolt/ep_signatureauth.git"
+  },
+  "keywords": [
+    "Etherpad",
+    "plugin",
+    "signature",
+    "authorize",
+    "authorization"
+  ],
+  "license": "AGPL-3.0",
+  "bugs": {
+    "url": "https://github.com/atomicjolt/ep_signatureauth/issues"
+  },
+  "homepage": "https://github.com/atomicjolt/ep_signatureauth#readme"
+}

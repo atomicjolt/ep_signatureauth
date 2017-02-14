@@ -1,0 +1,10 @@
+{
+  "parts": [
+    {
+      "name": "ep_signatureauth",
+      "hooks": {
+        "authorize": "ep_signatureauth/ep_signatureauth:authorize"
+      }
+    }
+  ]
+}
