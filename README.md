@@ -4,21 +4,26 @@ Etherpad Signature Authorization (ep_signatureauth)
 Description
 ===================================================
 
-This tool's expressed purpose is to
-enable secure sign-in and signature verification
-from the Canvas LMS with Etherpad collaborations tool.
+  This tool's expressed purpose is to
+  enable secure sign-in and signature verification
+  from the Canvas LMS with Etherpad collaborations tool.
 
 ===================================================
 Installation
 ===================================================
 
-  From your etherpad-lite folder
+  1. Run npm install ep_signatureauth from the etherpad-lite 
+  root folder
 
-    npm install "./ep_signatureauth"
+  or
 
-  Then add the public_key.pem file into the ep_signatureauth
-  directory. (This public key should correspond with
-  the private key used in Canvas to sign the url query.)
+  1. Clone the ep_signatureauth repository into the node_modules 
+  folder of your Etherpad instance.
+
+  After either step one create a secret.yml file in your
+  etherpad-lite root directory and add the secret generated
+  by rake:secret that also resides in the setting of 
+  the corresponding etherpad security gem plugin in Canvas. 
 
 ===================================================
 Usage
@@ -42,6 +47,11 @@ Contributing
 ===================================================
 History
 ===================================================
+
+  At first the authorization would happen only through
+  signature verification. It will still accomplish this upon
+  accessing the Etherpad for the first time, at which time, 
+  it will create a cookie that will be used for future verification.
 
 ===================================================
 Credits
