@@ -57,7 +57,7 @@ function getColorPalette() {
   return ["#ffc7c7", "#fff1c7", "#e3ffc7", "#c7ffd5", "#c7ffff", "#c7d5ff", "#e3c7ff", "#ffc7f1", "#ff8f8f", "#ffe38f", "#c7ff8f", "#8fffab", "#8fffff", "#8fabff", "#c78fff", "#ff8fe3", "#d97979", "#d9c179", "#a9d979", "#79d991", "#79d9d9", "#7991d9", "#a979d9", "#d979c1", "#d9a9a9", "#d9cda9", "#c1d9a9", "#a9d9b5", "#a9d9d9", "#a9b5d9", "#c1a9d9", "#d9a9cd", "#4c9c82", "#12d1ad", "#2d8e80", "#7485c3", "#a091c7", "#3185ab", "#6818b4", "#e6e76d", "#a42c64", "#f386e5", "#4ecc0c", "#c0c236", "#693224", "#b5de6a", "#9b88fd", "#358f9b", "#496d2f", "#e267fe", "#d23056", "#1a1a64", "#5aa335", "#d722bb", "#86dc6c", "#b5a714", "#955b6a", "#9f2985", "#4b81c8", "#3d6a5b", "#434e16", "#d16084", "#af6a0e", "#8c8bd8"];
 }
 
-function signaturePayload(context){
+function verifyURLSignature(context){
   const signature = context.req.query.signature;
   const payload = context.req.url.split('&signature=')[0];
   const timestamp = context.req.query.timestamp;
@@ -71,7 +71,7 @@ function author(username) {
   });
 }
 
-function cookieVerification(cookie) {
+function verifyCookie(cookie) {
   const parsedCookie = JSON.parse(cookie);
   const signature = parsedCookie.signature;
   const payload = parsedCookie.payload;
@@ -86,7 +86,7 @@ exports.authorize = function(hook_name, context, cb) {
     const url = context.req.url;
     const username = context.req.query.username;
     if (url.includes('&signature') && url.startsWith('/p/')) {
-      if (signaturePayload(context)) {
+      if (verifyURLSignature(context)) {
         author(username);
         const simpleUrl = url.split('?')[0];
         const url_payload = url.split("&signature=")[0];
@@ -102,7 +102,7 @@ exports.authorize = function(hook_name, context, cb) {
     } else {
       const cookie = cookies.get(url);
       if (cookie) {
-        const cookieValid = cookieVerification(cookie);
+        const cookieValid = verifyCookie(cookie);
         if (cookieValid) {
           author(username);
         }
