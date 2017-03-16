@@ -1,6 +1,6 @@
 {
   "name": "ep_signatureauth",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Enable secure sign-in and signature verification from Canvas LMS with Etherpad collaborations tool.",
   "author": "emdurr <ericdurr@atomicjolt.com> (Eric Durr)",
   "contributors": [],
