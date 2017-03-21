@@ -1,5 +1,4 @@
 Etherpad Signature Authorization (ep_signatureauth)
-===================================================
 
 Description
 ===================================================
@@ -8,7 +7,6 @@ Description
   enable secure sign-in and signature verification
   from the Canvas LMS with Etherpad collaborations tool.
 
-===================================================
 Installation
 ===================================================
 
@@ -25,7 +23,6 @@ Installation
   by rake:secret that also resides in the setting of 
   the corresponding etherpad security gem plugin in Canvas. 
 
-===================================================
 Usage
 ===================================================
 
@@ -34,7 +31,6 @@ Usage
   than the one provided by a Canvas LMS that has the
   appropriately authored signature.
 
-===================================================
 Contributing
 ===================================================
 
@@ -44,7 +40,6 @@ Contributing
   4. Push to the branch: git push origin my-new-feature
   5. Submit a pull request :D
 
-===================================================
 History
 ===================================================
 
@@ -53,11 +48,9 @@ History
   accessing the Etherpad for the first time, at which time, 
   it will create a cookie that will be used for future verification.
 
-===================================================
 Credits
 ===================================================
 
-===================================================
 License
 ===================================================
   AGPL-3.0 License
