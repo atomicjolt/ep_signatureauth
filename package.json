@@ -8,7 +8,8 @@
     "async": "^1.2.1",
     "async-stacktrace": "^0.0.2",
     "cookies": "^0.7.0",
-    "js-yaml": "^3.8.2"
+    "js-yaml": "^3.8.2",
+    "timing-safe-equal": "^1.0.0"
   },
   "engines": {
     "node": ">= 0.6.0"
