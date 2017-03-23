@@ -21,6 +21,9 @@ const fs = require('fs');
 const db = require("ep_etherpad-lite/node/db/DB").db;
 const cks = require("cookies");
 const yaml = require('js-yaml');
+// This is required because we are running etherpad under node 4 for annoying
+// reasons, and the official version from the crypto library isn't available.
+const timingSafeEqual = require('timing-safe-equal');
 
 const absolutePath = path.resolve(('./secrets.yml'));
 const secretYml = yaml.safeLoad(fs.readFileSync(absolutePath, 'utf8'));
@@ -37,7 +40,7 @@ function validSignature(payload, signature){
   const hmac_result = hmac.digest('hex');
   const result = new Buffer(hmac_result, 'utf-8');
   const buf = new Buffer(signature, 'utf-8');
-  const valid = crypto.timingSafeEqual(result, buf);
+  const valid = timingSafeEqual(result, buf);
 
   return valid;
 }
