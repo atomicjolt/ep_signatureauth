@@ -108,7 +108,7 @@ exports.authorize = function(hook_name, context, cb) {
         }
         return cb([cookieValid]);
       } else {
-        return cb[false];
+        return cb([false]);
       }
     }
   }
