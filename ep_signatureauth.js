@@ -82,7 +82,7 @@ function verifyCookie(cookie) {
 }
 
 exports.authorize = function(hook_name, context, cb) {
-  if (context.resource.match(/^\/(static|javascripts|pluginfw|favicon.ico|api)/)) {
+  if (context.resource.match(/^\/(static|javascripts|pluginfw|favicon.ico|api|locales|jserror)/)) {
     return cb([true]);
   } else {
     const cookies = new cks(context.req, context.res);
@@ -98,7 +98,6 @@ exports.authorize = function(hook_name, context, cb) {
           simpleUrl, `{ "signature": "${signature}", "payload": "${url_payload}" }`, { overwrite: true, maxAge: 100000000 }
         );
         return context.res.redirect(simpleUrl);
-        return cb([true]);
       } else {
         return cb([false]);
       }

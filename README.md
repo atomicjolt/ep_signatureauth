@@ -23,8 +23,8 @@ Installation
   by rake:secret that also resides in the setting of 
   the corresponding etherpad security gem plugin in Canvas. 
 
-  After setting up the yml file set 'requireAuthorization' to
-  true in the settings file.
+  After setting up the yml file set 'requireAuthorization' & 
+  'requireAuthentication' to true in the settings file.
 
 Usage
 ===================================================
