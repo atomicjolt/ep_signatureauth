@@ -95,14 +95,14 @@ exports.authorize = function(hook_name, context, cb) {
         const url_payload = url.split("&signature=")[0];
         const signature = context.req.query.signature;
         cookies.set(
-          simpleUrl, `{ "signature": "${signature}", "payload": "${url_payload}" }`, { overwrite: true, maxAge: 100000000 }
+          "etherpad_security", `{ "signature": "${signature}", "payload": "${url_payload}" }`, { overwrite: true, maxAge: 100000000 }
         );
         return context.res.redirect(simpleUrl);
       } else {
         return cb([false]);
       }
     } else {
-      const cookie = cookies.get(url);
+      const cookie = cookies.get("etherpad_security");
       if (cookie) {
         const cookieValid = verifyCookie(cookie);
         if (cookieValid) {
