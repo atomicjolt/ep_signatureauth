@@ -1,4 +1,4 @@
-// Copyright (C) 2017 Atomic Jolt
+// Copyright (C) 2017,2021 Atomic Jolt
 
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU Affero General Public License as published by
@@ -13,17 +13,13 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-const ERR = require("async-stacktrace");
-const settings = require('ep_etherpad-lite/node/utils/Settings');
 const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
-const db = require("ep_etherpad-lite/node/db/DB").db;
-const cks = require("cookies");
 const yaml = require('js-yaml');
-// This is required because we are running etherpad under node 4 for annoying
-// reasons, and the official version from the crypto library isn't available.
-const timingSafeEqual = require('timing-safe-equal');
+
+const settings = require('ep_etherpad-lite/node/utils/Settings');
+const authorManager = require('ep_etherpad-lite/node/db/AuthorManager');
 
 const absolutePath = path.resolve(('./secrets.yml'));
 const secretYml = yaml.safeLoad(fs.readFileSync(absolutePath, 'utf8'));
@@ -40,24 +36,9 @@ function validSignature(payload, signature){
   const hmac_result = hmac.digest('hex');
   const result = new Buffer(hmac_result, 'utf-8');
   const buf = new Buffer(signature, 'utf-8');
-  const valid = timingSafeEqual(result, buf);
+  const valid = crypto.timingSafeEqual(result, buf);
 
   return valid;
-}
-
-function getAuthor(username, cb){
-  db.get("globalAuthor:" + username, cb);
-}
-
-function createAuthor(username, callback)
-{
-  const authorObj = {"colorId" : Math.floor(Math.random()*(getColorPalette().length)), "name": username, "timestamp": new Date().getTime()};
-  db.set("globalAuthor:" + username, authorObj);
-  callback(null, {authorID: username});
-}
-
-function getColorPalette() {
-  return ["#ffc7c7", "#fff1c7", "#e3ffc7", "#c7ffd5", "#c7ffff", "#c7d5ff", "#e3c7ff", "#ffc7f1", "#ff8f8f", "#ffe38f", "#c7ff8f", "#8fffab", "#8fffff", "#8fabff", "#c78fff", "#ff8fe3", "#d97979", "#d9c179", "#a9d979", "#79d991", "#79d9d9", "#7991d9", "#a979d9", "#d979c1", "#d9a9a9", "#d9cda9", "#c1d9a9", "#a9d9b5", "#a9d9d9", "#a9b5d9", "#c1a9d9", "#d9a9cd", "#4c9c82", "#12d1ad", "#2d8e80", "#7485c3", "#a091c7", "#3185ab", "#6818b4", "#e6e76d", "#a42c64", "#f386e5", "#4ecc0c", "#c0c236", "#693224", "#b5de6a", "#9b88fd", "#358f9b", "#496d2f", "#e267fe", "#d23056", "#1a1a64", "#5aa335", "#d722bb", "#86dc6c", "#b5a714", "#955b6a", "#9f2985", "#4b81c8", "#3d6a5b", "#434e16", "#d16084", "#af6a0e", "#8c8bd8"];
 }
 
 function verifyURLSignature(context){
@@ -67,51 +48,51 @@ function verifyURLSignature(context){
   return (validSignature(payload, signature) && recentEnough(timestamp));
 }
 
-function author(username) {
-  getAuthor(username, (err, res) => {
-  if (!res)
-    createAuthor(username, (err, res) => (console.log(res)));
-  });
-}
-
-function verifyCookie(cookie) {
-  const parsedCookie = JSON.parse(cookie);
-  const signature = parsedCookie.signature;
-  const payload = parsedCookie.payload;
-  return validSignature(payload, signature);
-}
-
-exports.authorize = function(hook_name, context, cb) {
-  if (context.resource.match(/^\/(static|javascripts|pluginfw|favicon.ico|api|locales|jserror)/)) {
-    return cb([true]);
-  } else {
-    const cookies = new cks(context.req, context.res);
-    const url = context.req.url;
-    const username = context.req.query.username;
-    if (url.includes('&signature') && url.startsWith('/p/')) {
-      if (verifyURLSignature(context)) {
-        author(username);
-        const simpleUrl = url.split('?')[0];
-        const url_payload = url.split("&signature=")[0];
-        const signature = context.req.query.signature;
-        cookies.set(
-          "etherpad_security", `{ "signature": "${signature}", "payload": "${url_payload}" }`, { overwrite: true, maxAge: 100000000 }
-        );
-        return context.res.redirect(simpleUrl);
-      } else {
-        return cb([false]);
-      }
+exports.authenticate = async (hook_name, context) => {
+  const url = context.req.url;
+  const username = context.req.query.username;
+  if (url.includes('&signature') && url.startsWith('/p/')) {
+    if (verifyURLSignature(context)) {
+      settings.users[username] = { username };
+      context.req.session.user = settings.users[username];
+      return [true];
     } else {
-      const cookie = cookies.get("etherpad_security");
-      if (cookie) {
-        const cookieValid = verifyCookie(cookie);
-        if (cookieValid) {
-          author(username);
-        }
-        return cb([cookieValid]);
-      } else {
-        return cb([false]);
-      }
+      return [false];
     }
   }
+  return [];
+};
+
+exports.authorize = async (hook_name, context) => {
+  const user = context.req.session.user;
+
+  const encodedPadId = (context.resource.match(/^\/p\/([^/]*)/) || [])[1];
+  if (encodedPadId == null) return [];
+
+  const padId = decodeURIComponent(encodedPadId);
+  // Rely on the session padAuthorizations if we set it already
+  if (user.padAuthorizations && user.padAuthorizations[padId]) return user.padAuthorizations[padId];
+
+  const url = context.req.url;
+  if (url.includes('&signature') && url.startsWith('/p/')) {
+    if (verifyURLSignature(context)) {
+      // This will set padAuthorizations for this pad
+      return ['create'];
+    }
+  }
+  return [false];
+};
+
+exports.handleMessage = async (hook_name, { message, socket }) => {
+  // Update author name and prevent changes
+  if (message.type == "CLIENT_READY" && message.token) {
+    const user = socket.client.request.session.user;
+    if (user && user.username) {
+      const authorId = await authorManager.getAuthor4Token(message.token);
+      authorManager.setAuthorName(authorId, user.username);
+    }
+  } else if (message.type == "USERINFO_UPDATE") {
+    return [null];
+  }
+  return [message];
 };

@@ -3,7 +3,9 @@
     {
       "name": "ep_signatureauth",
       "hooks": {
-        "authorize": "ep_signatureauth/ep_signatureauth:authorize"
+        "authenticate": "ep_signatureauth/ep_signatureauth:authenticate",
+        "authorize": "ep_signatureauth/ep_signatureauth:authorize",
+        "handleMessage": "ep_signatureauth/ep_signatureauth:handleMessage"
       }
     }
   ]
