@@ -3,9 +3,8 @@ Etherpad Signature Authorization (ep_signatureauth)
 Description
 ===================================================
 
-  This tool's expressed purpose is to
-  enable secure sign-in and signature verification
-  from the Canvas LMS with Etherpad collaborations tool.
+  This tool allows secure sign on from the Canvas LMS
+  with the Etherpad collaborations tool.
 
 Installation
 ===================================================
@@ -19,12 +18,17 @@ Installation
   folder of your Etherpad instance.
 
   After either step one create a secret.yml file in your
-  etherpad-lite root directory and add the secret generated
-  by rake:secret that also resides in the setting of 
-  the corresponding etherpad security gem plugin in Canvas. 
+  etherpad-lite root directory and add a secret generated
+  by rake:secret.
+  
+  Configure etherpad so that 'requireAuthorization' & 
+  'requireAuthentication' are true in the settings file.
 
-  After setting up the yml file set 'requireAuthorization' & 
-  'requireAuthentication' to true in the settings file.
+  2. Install the `etherpad_canvas` plugin from
+
+  https://github.com/atomicjolt/etherpad_canvas
+
+  Enable the plugin and add the secret above to the plugin settings.
 
 Usage
 ===================================================
