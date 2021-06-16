@@ -70,16 +70,24 @@ exports.authorize = async (hook_name, context) => {
   if (encodedPadId == null) return [];
 
   const padId = decodeURIComponent(encodedPadId);
-  // Rely on the session padAuthorizations if we set it already
-  if (user.padAuthorizations && user.padAuthorizations[padId]) return user.padAuthorizations[padId];
-
   const url = context.req.url;
   if (url.includes('&signature') && url.startsWith('/p/')) {
     if (verifyURLSignature(context)) {
-      // This will set padAuthorizations for this pad
+      // Set padAuthorizations for this pad. Normally we could depend on
+      // the caller to set this, but the redirect skips that step
+      if (user.padAuthorizations == null) user.padAuthorizations = {};
+      user.padAuthorizations[padId] = 'create';
+
+      // Redirect to simplify the url
+      const simpleUrl = url.split('?')[0];
+      context.res.redirect(simpleUrl);
+
       return ['create'];
     }
   }
+  // Rely on the session padAuthorizations if we set it already
+  if (user.padAuthorizations && user.padAuthorizations[padId]) return user.padAuthorizations[padId];
+
   return [false];
 };
 
